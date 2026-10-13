@@ -19,9 +19,10 @@ resource "helm_release" "alb_controller" {
   timeout = 600
 
   values = [yamlencode({
-    clusterName = local.p.cluster_name
-    region      = var.region
-    vpcId       = local.p.vpc_id
+    clusterName  = local.p.cluster_name
+    replicaCount = 1
+    region       = var.region
+    vpcId        = local.p.vpc_id
     serviceAccount = {
       create = true
       name   = "aws-load-balancer-controller"
@@ -85,6 +86,8 @@ resource "helm_release" "argocd" {
     server = {
       service = { type = "ClusterIP" } # reach the UI with kubectl port-forward
     }
+    dex           = { enabled = false }
+    notifications = { enabled = false }
   })]
 
   depends_on = [

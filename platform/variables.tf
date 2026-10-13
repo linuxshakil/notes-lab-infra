@@ -44,17 +44,17 @@ variable "api_public_access_cidrs" {
 
 variable "node_instance_type" {
   type    = string
-  default = "t3.medium"
+  default = "t3.small"
 }
 
 variable "node_min_size" {
   type    = number
-  default = 2
+  default = 3
 }
 
 variable "node_desired_size" {
   type    = number
-  default = 2
+  default = 3
 }
 
 variable "node_max_size" {
@@ -93,15 +93,15 @@ variable "environments" {
       db_instance_class      = "db.t4g.micro"
       db_allocated_storage   = 20
       db_multi_az            = false
-      db_backup_retention    = 3
+      db_backup_retention    = 1
       db_deletion_protection = false
       db_skip_final_snapshot = true
     }
     prod = {
-      db_instance_class      = "db.t4g.small"
+      db_instance_class      = "db.t4g.micro"
       db_allocated_storage   = 20
       db_multi_az            = false # flip to true when you want real HA (doubles DB cost)
-      db_backup_retention    = 7
+      db_backup_retention    = 1
       db_deletion_protection = true
       db_skip_final_snapshot = false
     }
