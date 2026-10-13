@@ -1,0 +1,5 @@
+state_bucket_name  = "notes-lab-509306733905-tfstate"
+github_org         = "linuxshakil"
+budget_email       = "you@example.com"
+monthly_budget_usd = 100
+operator_user_name = "lab-operator"

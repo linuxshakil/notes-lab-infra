@@ -1,0 +1,5 @@
+bucket       = "notes-lab-509306733905-tfstate"
+key          = "addons/terraform.tfstate"
+region       = "ap-south-1"
+use_lockfile = true
+encrypt      = true

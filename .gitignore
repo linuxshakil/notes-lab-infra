@@ -1,0 +1,9 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+tfplan
+*.tfvars
+!*.tfvars.example
+backend.hcl
+crash.log
+# commit .terraform.lock.hcl on purpose (pins provider versions)

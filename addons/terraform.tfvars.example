@@ -1,0 +1,2 @@
+state_bucket    = "notes-lab-509306733905-tfstate"
+deploy_repo_url = "https://github.com/linuxshakil/notes-app-deploy.git"

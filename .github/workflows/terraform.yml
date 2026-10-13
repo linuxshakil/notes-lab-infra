@@ -1,0 +1,32 @@
+name: Terraform
+
+on:
+  pull_request:
+    paths: ["platform/**", "addons/**", ".github/workflows/**"]
+  push:
+    branches: [main]
+    paths: ["platform/**", "addons/**", ".github/workflows/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: terraform
+  cancel-in-progress: false
+
+jobs:
+  platform:
+    uses: ./.github/workflows/_layer.yml
+    with:
+      layer: platform
+      apply: ${{ github.event_name != 'pull_request' }}
+
+  # addons need the cluster from platform, so they always run after it.
+  addons:
+    needs: platform
+    uses: ./.github/workflows/_layer.yml
+    with:
+      layer: addons
+      apply: ${{ github.event_name != 'pull_request' }}

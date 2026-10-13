@@ -1,0 +1,68 @@
+name: Destroy everything (cost saver)
+
+# Tear the lab down when you are not using it (EKS + NAT + RDS cost money
+# even when idle). Bootstrap (state bucket, OIDC, CloudTrail) is NOT touched.
+#
+# Before running: prod RDS has deletion_protection = true. Set
+# db_deletion_protection = false for prod in platform/variables.tf,
+# merge, let apply run, THEN run this.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "destroy" to continue'
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_VAR_github_org: ${{ github.repository_owner }}
+  TF_VAR_state_bucket: ${{ vars.TF_STATE_BUCKET }}
+  TF_VAR_deploy_repo_url: https://github.com/${{ github.repository_owner }}/notes-app-deploy.git
+
+jobs:
+  destroy:
+    if: inputs.confirm == 'destroy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment: production-infra
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.TF_APPLY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.10"
+
+      # ALBs are created by the controller, not by Terraform. If they still
+      # exist, the VPC cannot be deleted. Remove the Ingresses first.
+      - name: Delete Ingresses (so the controller removes the ALBs)
+        continue-on-error: true
+        run: |
+          aws eks update-kubeconfig --name notes-lab --region "${{ vars.AWS_REGION }}"
+          kubectl delete ingress --all -A --wait=true --timeout=300s
+          sleep 60
+
+      - name: Destroy addons
+        working-directory: addons
+        run: |
+          terraform init -input=false \
+            -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" -backend-config="key=addons/terraform.tfstate" \
+            -backend-config="region=${{ vars.AWS_REGION }}" -backend-config="use_lockfile=true"
+          terraform destroy -input=false -auto-approve
+
+      - name: Destroy platform
+        working-directory: platform
+        run: |
+          terraform init -input=false \
+            -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" -backend-config="key=platform/terraform.tfstate" \
+            -backend-config="region=${{ vars.AWS_REGION }}" -backend-config="use_lockfile=true"
+          terraform destroy -input=false -auto-approve
