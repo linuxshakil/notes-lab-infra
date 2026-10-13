@@ -21,6 +21,7 @@ permissions:
 env:
   TF_IN_AUTOMATION: "true"
   TF_VAR_github_org: ${{ github.repository_owner }}
+  TF_VAR_app_repo_subject: ${{ vars.APP_REPO_SUBJECT }}
   TF_VAR_state_bucket: ${{ vars.TF_STATE_BUCKET }}
   TF_VAR_deploy_repo_url: https://github.com/${{ github.repository_owner }}/notes-app-deploy.git
 

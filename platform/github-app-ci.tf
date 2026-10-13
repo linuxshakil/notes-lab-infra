@@ -1,3 +1,7 @@
+locals {
+  app_subject = var.app_repo_subject != "" ? var.app_repo_subject : "${var.github_org}/${var.app_repo}"
+}
+
 ############################################################
 # GitHub Actions role for the APP repo: may ONLY push images to
 # this one ECR repository, and only from the main branch.
@@ -23,7 +27,7 @@ data "aws_iam_policy_document" "app_ci_trust" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_org}/${var.app_repo}:ref:refs/heads/main"]
+      values   = ["repo:${local.app_subject}:ref:refs/heads/main"]
     }
   }
 }

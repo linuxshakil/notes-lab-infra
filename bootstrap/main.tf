@@ -38,7 +38,8 @@ provider "aws" {
 data "aws_caller_identity" "current" {}
 
 locals {
-  account_id = data.aws_caller_identity.current.account_id
+  account_id    = data.aws_caller_identity.current.account_id
+  infra_subject = var.infra_repo_subject != "" ? var.infra_repo_subject : "${var.github_org}/${var.infra_repo}"
 }
 
 ############################################################
@@ -149,8 +150,8 @@ data "aws_iam_policy_document" "plan_trust" {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
       values = [
-        "repo:${var.github_org}/${var.infra_repo}:pull_request",
-        "repo:${var.github_org}/${var.infra_repo}:ref:refs/heads/main",
+        "repo:${local.infra_subject}:pull_request",
+        "repo:${local.infra_subject}:ref:refs/heads/main",
       ]
     }
   }
@@ -206,7 +207,7 @@ data "aws_iam_policy_document" "apply_trust" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_org}/${var.infra_repo}:environment:production-infra"]
+      values   = ["repo:${local.infra_subject}:environment:production-infra"]
     }
   }
 }

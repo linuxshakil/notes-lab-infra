@@ -107,3 +107,9 @@ variable "environments" {
     }
   }
 }
+
+variable "app_repo_subject" {
+  description = "GitHub token subject of the app repo"
+  type        = string
+  default     = ""
+}

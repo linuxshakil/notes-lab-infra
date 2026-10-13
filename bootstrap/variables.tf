@@ -46,3 +46,9 @@ variable "enable_guardduty" {
   type        = bool
   default     = true
 }
+
+variable "infra_repo_subject" {
+  description = "GitHub token subject of the infra repo"
+  type        = string
+  default     = ""
+}
